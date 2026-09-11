@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://aminezalarh-code.github.io/mh-pressing-preview/wp-sitemap.xml

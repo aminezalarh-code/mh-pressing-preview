@@ -1,0 +1,1380 @@
+/*
+ * M&H Pressing — design system and components.
+ *
+ * Direction: editorial premium. Deep navy and warm paper, generous whitespace,
+ * a serif accent against a clean grotesque, restrained radii, and motion only
+ * on state change. The storefront photograph is the loudest thing on the page;
+ * everything else stays quiet so it can be.
+ *
+ * Written mobile-first. Logical properties (inline-start/end) are used
+ * throughout so the Arabic RTL layout is a direction flip, not a second sheet.
+ *
+ * 1.  Tokens
+ * 2.  Reset and base
+ * 3.  Typography
+ * 4.  Layout primitives
+ * 5.  Buttons and links
+ * 6.  Brand lockup
+ * 7.  Header and navigation
+ * 8.  Hero
+ * 9.  Trust strip
+ * 10. Services
+ * 11. Pickup and delivery / booking form
+ * 12. How it works
+ * 13. Pricing
+ * 14. Why M&H
+ * 15. Reviews
+ * 16. Location
+ * 17. FAQ
+ * 18. Final CTA
+ * 19. Footer
+ * 20. Sticky mobile CTA
+ * 21. 404
+ * 22. RTL adjustments
+ */
+
+/* ── 1. Tokens ───────────────────────────────────────────────────────── */
+
+:root {
+	/* Ink and surfaces */
+	--ink:        #0B1F33;
+	--ink-soft:   #44576B;
+	/* Darkened from #6B7C8D, which computed 4.29:1 on white and 3.94:1 on
+	   sand — both under WCAG AA 4.5:1 for normal text. This token carries 24
+	   declarations (hints, sub-labels, table headers, the consent line), so it
+	   was the single largest contrast problem on the site. Now 5.46 / 5.01 /
+	   4.59 on white, sand and sand-deep. */
+	--muted:      #5C6B7C;
+	--navy:       #0E2A4A;
+	--navy-deep:  #081D35;
+	--paper:      #FFFFFF;
+	--sand:       #F7F5F1;
+	--sand-deep:  #EFEBE4;
+	--line:       #E3DFD7;
+	--line-soft:  #EFECE6;
+
+	/* Action */
+	--blue:       #1A56DB;
+	--blue-ink:   #133FA5;
+	--blue-wash:  #EDF2FE;
+	/* The WhatsApp button. White on #1FA855 computed 3.09:1 — a clear AA
+	   failure on the site’s primary conversion control. #17843F is 4.76:1 and
+	   still unmistakably the WhatsApp green family. */
+	--green:      #17843F;
+	/* Hover for the above, and the success-message text. As text on the
+	   #E9F7EF status background the old value was 4.31:1, also failing; this
+	   is 7.65:1. */
+	--green-ink:  #10592A;
+	--gold:       #C89B3C;
+
+	/* Type */
+	--font-sans:  'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+	--font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+	--font-ar:    'Noto Kufi Arabic', system-ui, sans-serif;
+
+	/* Spacing — 4px base */
+	--s1: 4px;   --s2: 8px;   --s3: 12px;  --s4: 16px;
+	--s5: 24px;  --s6: 32px;  --s7: 40px;  --s8: 56px;
+	--s9: 72px;  --s10: 96px; --s11: 128px;
+
+	/* Form */
+	--r-sm: 4px;
+	--r:    8px;
+	--r-lg: 12px;
+
+	--shadow-sm: 0 1px 2px rgba(11, 31, 51, .06), 0 1px 3px rgba(11, 31, 51, .04);
+	--shadow:    0 4px 16px rgba(11, 31, 51, .07);
+	--shadow-lg: 0 18px 50px rgba(11, 31, 51, .13);
+
+	--container: 1200px;
+	--reading:   62ch;
+
+	--ease: cubic-bezier(.4, 0, .2, 1);
+}
+
+/* Arabic gets its own family, applied via the language body class. */
+.mh-lang-ar {
+	--font-sans:  var(--font-ar);
+	--font-serif: var(--font-ar);
+}
+
+/* ── 2. Reset and base ───────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+	-webkit-text-size-adjust: 100%;
+	scroll-behavior: smooth;
+	scroll-padding-top: 88px;
+}
+
+body {
+	margin: 0;
+	background: var(--paper);
+	color: var(--ink);
+	font-family: var(--font-sans);
+	font-size: 17px;
+	line-height: 1.65;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	overflow-x: hidden;
+}
+
+img, svg, video { max-width: 100%; height: auto; display: block; }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+:focus-visible {
+	outline: 2px solid var(--blue);
+	outline-offset: 3px;
+	border-radius: var(--r-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html { scroll-behavior: auto; }
+	*, *::before, *::after {
+		animation-duration: .01ms !important;
+		transition-duration: .01ms !important;
+	}
+}
+
+/*
+ * Hidden by moving it vertically, not horizontally. `inset-inline-start:
+ * -9999px` flips to the right-hand edge under RTL and pushed the document to
+ * ~10800px wide in Arabic, producing real horizontal scroll.
+ */
+.skip-link {
+	position: absolute;
+	inset-inline-start: 0;
+	top: 0;
+	z-index: 200;
+	transform: translateY(-200%);
+	background: var(--navy);
+	color: #fff;
+	padding: var(--s3) var(--s5);
+	border-radius: 0 0 var(--r) 0;
+	transition: transform .15s var(--ease);
+}
+.skip-link:focus { transform: translateY(0); }
+
+.visually-hidden {
+	position: absolute !important;
+	width: 1px; height: 1px;
+	padding: 0; margin: -1px;
+	overflow: hidden; clip: rect(0 0 0 0);
+	white-space: nowrap; border: 0;
+}
+
+/* ── 3. Typography ───────────────────────────────────────────────────── */
+
+h1, h2, h3, h4 {
+	margin: 0;
+	line-height: 1.12;
+	letter-spacing: -.022em;
+	font-weight: 700;
+	text-wrap: balance;
+}
+
+h1 { font-size: clamp(2.25rem, 6.2vw, 4rem); }
+h2 { font-size: clamp(1.75rem, 3.9vw, 2.75rem); }
+h3 { font-size: clamp(1.1rem, 1.7vw, 1.3rem); letter-spacing: -.012em; }
+h4 { font-size: 1rem; letter-spacing: 0; }
+
+p { margin: 0 0 var(--s4); }
+p:last-child { margin-bottom: 0; }
+
+a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { color: var(--blue-ink); }
+
+.serif {
+	font-family: var(--font-serif);
+	font-weight: 400;
+	font-style: italic;
+	letter-spacing: -.01em;
+}
+
+.eyebrow {
+	display: block;
+	font-size: .78rem;
+	font-weight: 600;
+	letter-spacing: .13em;
+	text-transform: uppercase;
+	color: var(--blue);
+	margin-bottom: var(--s3);
+}
+.eyebrow--light { color: rgba(255, 255, 255, .72); }
+
+.lede {
+	font-size: clamp(1.02rem, 1.5vw, 1.15rem);
+	color: var(--ink-soft);
+	max-width: var(--reading);
+}
+
+/* Arabic sets slightly looser, and does not want the italic serif. */
+.mh-lang-ar h1, .mh-lang-ar h2, .mh-lang-ar h3 { letter-spacing: 0; line-height: 1.3; }
+.mh-lang-ar .serif { font-style: normal; }
+.mh-lang-ar body, .mh-lang-ar p { line-height: 1.85; }
+
+/* ── 4. Layout primitives ────────────────────────────────────────────── */
+
+.container {
+	width: 100%;
+	max-width: var(--container);
+	margin-inline: auto;
+	padding-inline: var(--s5);
+}
+
+.section { padding-block: var(--s9); }
+.section--tight { padding-block: var(--s8); }
+.section--sand { background: var(--sand); }
+.section--navy { background: var(--navy); color: #fff; }
+.section--navy .lede { color: rgba(255, 255, 255, .76); }
+
+.section__head { max-width: 44rem; margin-bottom: var(--s7); }
+.section__head--center { margin-inline: auto; text-align: center; }
+
+/* Heading left, supporting line right — an editorial masthead rather than a
+   centred stack, and it stops every section opening the same way. */
+.section__head--split { max-width: none; display: grid; gap: var(--s4); }
+@media (min-width: 900px) {
+	.section__head--split {
+		grid-template-columns: 1.1fr .9fr;
+		align-items: end;
+		gap: var(--s9);
+		margin-bottom: var(--s8);
+	}
+	.section__head--split .lede { padding-bottom: 6px; }
+}
+
+.grid { display: grid; gap: var(--s5); }
+
+@media (min-width: 640px)  { .grid--2 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px)  {
+	.grid--3 { grid-template-columns: repeat(3, 1fr); }
+	.grid--4 { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 640px) and (max-width: 899px) {
+	.grid--3, .grid--4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+	.section { padding-block: var(--s10); }
+}
+
+/* ── 5. Buttons ──────────────────────────────────────────────────────── */
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--s2);
+	padding: 14px var(--s5);
+	min-height: 50px;
+	border: 1px solid transparent;
+	border-radius: var(--r);
+	font-size: .97rem;
+	font-weight: 600;
+	line-height: 1;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color .18s var(--ease), border-color .18s var(--ease),
+	            color .18s var(--ease), transform .12s var(--ease);
+}
+.btn:active { transform: translateY(1px); }
+
+.btn--primary { background: var(--navy); color: #fff; }
+.btn--primary:hover { background: var(--navy-deep); color: #fff; }
+
+.btn--blue { background: var(--blue); color: #fff; }
+.btn--blue:hover { background: var(--blue-ink); color: #fff; }
+
+.btn--ghost {
+	background: var(--paper);
+	color: var(--ink);
+	border-color: var(--line);
+}
+.btn--ghost:hover { border-color: var(--ink); color: var(--ink); }
+
+.btn--outline {
+	background: transparent;
+	color: #fff;
+	border-color: rgba(255, 255, 255, .38);
+}
+.btn--outline:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+
+/* For use over photography: enough fill to stay legible on any frame,
+   without becoming a solid slab that fights the primary action. */
+.btn--glass {
+	background: rgba(255, 255, 255, .14);
+	color: #fff;
+	border-color: rgba(255, 255, 255, .45);
+	backdrop-filter: blur(6px);
+}
+.btn--glass:hover { background: rgba(255, 255, 255, .24); color: #fff; border-color: #fff; }
+
+.btn--whatsapp { background: var(--green); color: #fff; }
+.btn--whatsapp:hover { background: var(--green-ink); color: #fff; }
+
+.btn--block { width: 100%; }
+.btn--lg { min-height: 56px; padding-inline: var(--s6); font-size: 1.02rem; }
+
+.btn-row { display: flex; flex-wrap: wrap; gap: var(--s3); }
+
+/* ── 6. Brand lockup ─────────────────────────────────────────────────── */
+
+.brand {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--s3);
+	text-decoration: none;
+	color: inherit;
+}
+.brand__mark { flex: 0 0 auto; display: block; }
+.brand__body  { fill: currentColor; opacity: .1; }
+.brand__panel { fill: currentColor; opacity: .3; }
+.brand__led   { fill: var(--blue); }
+.brand__door  { fill: currentColor; opacity: .14; }
+.brand__glass { fill: var(--paper); }
+.brand__water { fill: var(--blue); }
+
+.brand__text { display: flex; flex-direction: column; line-height: 1.05; }
+.brand__name {
+	font-size: 1.42rem;
+	font-weight: 800;
+	letter-spacing: -.03em;
+}
+.brand__line {
+	font-size: .58rem;
+	font-weight: 600;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--muted);
+	margin-top: 3px;
+	/* Must stay on one line: wrapped over three rows it triples the header
+	   height on a 375px screen. Tightened rather than dropped — it is part
+	   of the brand identity and belongs in the lockup at every size. */
+	white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+	.brand__mark svg { width: 34px; height: 34px; }
+	.brand__name { font-size: 1.2rem; }
+	.brand__line { font-size: .48rem; letter-spacing: .09em; }
+	.header__inner { gap: var(--s3); min-height: 66px; }
+}
+
+.brand--light { color: #fff; }
+.brand--light .brand__glass { fill: var(--navy); }
+.brand--light .brand__line  { color: rgba(255, 255, 255, .7); }
+
+/* ── 7. Header ───────────────────────────────────────────────────────── */
+
+.header {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	background: rgba(255, 255, 255, .92);
+	backdrop-filter: saturate(1.6) blur(12px);
+	border-bottom: 1px solid var(--line-soft);
+}
+
+.header__inner {
+	display: flex;
+	align-items: center;
+	gap: var(--s5);
+	min-height: 76px;
+}
+
+.header__nav { display: none; margin-inline-start: auto; }
+
+.nav__list {
+	display: flex;
+	align-items: center;
+	gap: var(--s5);
+	margin: 0; padding: 0;
+	list-style: none;
+}
+.nav__link {
+	color: var(--ink-soft);
+	text-decoration: none;
+	font-size: .93rem;
+	font-weight: 500;
+	padding-block: var(--s2);
+	border-bottom: 2px solid transparent;
+	transition: color .16s var(--ease), border-color .16s var(--ease);
+}
+.nav__link:hover { color: var(--ink); }
+.nav__link[aria-current="page"] { color: var(--ink); border-bottom-color: var(--blue); }
+
+.header__actions { display: flex; align-items: center; gap: var(--s3); margin-inline-start: auto; }
+@media (min-width: 1100px) { .header__actions { margin-inline-start: 0; } }
+
+.header__cta { display: none; }
+
+/* Desktop-only call link. Hidden below 1100px because the sticky CTA bar
+   already carries WhatsApp and booking there; shown above it, where the
+   sticky bar is display:none and nothing else offers contact. */
+.header__tel {
+	display: none;
+	align-items: center;
+	gap: 6px;
+	font-size: .93rem;
+	font-weight: 600;
+	color: var(--ink);
+	text-decoration: none;
+	white-space: nowrap;
+	padding: 8px var(--s3);
+	border-radius: var(--r);
+	transition: color .16s var(--ease), background-color .16s var(--ease);
+}
+.header__tel:hover { color: var(--blue); background: var(--blue-wash); }
+.header__tel svg { color: var(--blue); }
+
+/* Language switcher */
+.langs { display: flex; align-items: center; gap: 2px; }
+.langs__link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 34px; height: 32px;
+	padding-inline: var(--s2);
+	border-radius: var(--r-sm);
+	font-size: .8rem;
+	font-weight: 600;
+	color: var(--muted);
+	text-decoration: none;
+	transition: background-color .16s var(--ease), color .16s var(--ease);
+}
+.langs__link:hover { background: var(--sand-deep); color: var(--ink); }
+.langs__link[aria-current="true"] { background: var(--navy); color: #fff; }
+
+/* Mobile menu toggle */
+.burger {
+	display: inline-flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 5px;
+	width: 44px; height: 44px;
+	padding: 0 10px;
+	background: none;
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+	cursor: pointer;
+}
+.burger span {
+	display: block; height: 2px;
+	background: var(--ink);
+	border-radius: 2px;
+	transition: transform .2s var(--ease), opacity .2s var(--ease);
+}
+.burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.mobile-nav {
+	display: none;
+	border-top: 1px solid var(--line-soft);
+	background: var(--paper);
+	padding-block: var(--s4) var(--s6);
+}
+.mobile-nav.is-open { display: block; }
+.mobile-nav__list { list-style: none; margin: 0 0 var(--s5); padding: 0; }
+.mobile-nav__list a {
+	display: block;
+	padding: var(--s3) 0;
+	color: var(--ink);
+	text-decoration: none;
+	font-size: 1.05rem;
+	font-weight: 500;
+	border-bottom: 1px solid var(--line-soft);
+}
+
+.mobile-nav__langs {
+	display: flex;
+	gap: var(--s2);
+	margin-top: var(--s5);
+	padding-top: var(--s4);
+	border-top: 1px solid var(--line-soft);
+}
+.mobile-nav__langs .langs__link { flex: 1; min-height: 42px; font-size: .9rem; }
+
+/* Below 560px the header switcher is replaced by the one in the drawer. */
+@media (max-width: 560px) {
+	.header__actions > .langs { display: none; }
+}
+@media (min-width: 561px) {
+	.mobile-nav__langs { display: none; }
+}
+
+@media (min-width: 1100px) {
+	.header__nav { display: block; }
+	.header__cta { display: inline-flex; }
+	.header__tel { display: inline-flex; }
+	.burger { display: none; }
+	.mobile-nav { display: none !important; }
+}
+
+/* ── 8. Hero ─────────────────────────────────────────────────────────── */
+
+.hero {
+	position: relative;
+	background: var(--navy);
+	color: #fff;
+	overflow: hidden;
+	/* Cinematic, but never so tall the CTAs fall below the fold on a laptop. */
+	min-height: clamp(560px, 82vh, 860px);
+	display: flex;
+	align-items: flex-end;
+}
+
+.hero__media { position: absolute; inset: 0; }
+
+/*
+ * Two-part scrim. A soft vertical wash anchors the type at the bottom, and a
+ * gentle directional wash lifts the reading side. Both are far lighter than
+ * the flat 93% wall this replaced, so the fascia, the window service list and
+ * the lit interior all stay visible — the photograph does the selling.
+ */
+.hero__shade {
+	position: absolute;
+	inset: 0;
+	background:
+		linear-gradient(to top,
+			rgba(6, 22, 40, .93) 0%,
+			rgba(6, 22, 40, .78) 26%,
+			rgba(6, 22, 40, .36) 54%,
+			rgba(6, 22, 40, .12) 78%,
+			rgba(6, 22, 40, .30) 100%),
+		linear-gradient(to right,
+			rgba(6, 22, 40, .55) 0%,
+			rgba(6, 22, 40, .22) 45%,
+			rgba(6, 22, 40, 0) 75%);
+}
+
+.hero__photo {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: 60% center;
+}
+
+/*
+ * Narrow viewports crop hard horizontally. Pulling the focal point left keeps
+ * the M&H fascia and the entrance in frame instead of landing on blank
+ * shopfront glass — the sign is the part that proves this is a real premises.
+ */
+@media (max-width: 760px) {
+	.hero__photo { object-position: 42% center; }
+}
+
+.hero__photo--empty {
+	width: 100%; height: 100%;
+	display: grid; place-items: center;
+	background:
+		repeating-linear-gradient(135deg, #16324F 0 22px, #14304B 22px 44px);
+}
+.hero__photo-note {
+	font-size: .82rem;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, .5);
+	border: 1px dashed rgba(255, 255, 255, .3);
+	padding: var(--s3) var(--s5);
+	border-radius: var(--r);
+	text-align: center;
+}
+
+.hero__inner {
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	padding-block: var(--s10) var(--s8);
+}
+
+.hero__copy { max-width: 34rem; }
+
+.hero__brandline {
+	display: block;
+	font-size: clamp(.72rem, 1.1vw, .82rem);
+	font-weight: 600;
+	letter-spacing: .34em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, .78);
+	margin-bottom: var(--s4);
+}
+
+.hero__title {
+	color: #fff;
+	font-size: clamp(2.75rem, 7.4vw, 5.25rem);
+	letter-spacing: -.035em;
+	line-height: .98;
+	margin-bottom: var(--s4);
+	text-wrap: pretty;
+}
+
+/* The deck carries the services; the lede carries pickup and delivery. */
+.hero__deck {
+	font-size: clamp(1.08rem, 1.7vw, 1.35rem);
+	font-weight: 500;
+	line-height: 1.35;
+	color: #fff;
+	margin-bottom: var(--s3);
+	letter-spacing: -.012em;
+	max-width: 28rem;
+}
+
+.hero__lede {
+	color: rgba(255, 255, 255, .82);
+	font-size: 1rem;
+	max-width: 30rem;
+	margin-bottom: var(--s6);
+}
+
+.hero__actions { margin-bottom: 0; }
+
+/* Full-width stacked CTAs on phones: booking is the page's whole purpose and
+   a content-width button on a 375px screen is a small target. */
+@media (max-width: 560px) {
+	.hero__actions { flex-direction: column; align-items: stretch; }
+	.hero__actions .btn { width: 100%; }
+}
+
+.hero__temp-flag {
+	position: absolute;
+	z-index: 2;
+	top: var(--s4);
+	inset-inline-end: var(--s4);
+	margin: 0;
+	padding: 6px 12px;
+	border-radius: var(--r-sm);
+	background: rgba(255, 214, 0, .92);
+	color: #3b2c00;
+	font-size: .72rem;
+	font-weight: 600;
+}
+.hero__temp-flag code { font-size: .72rem; background: rgba(0, 0, 0, .08); padding: 1px 5px; border-radius: 3px; }
+
+@media (min-width: 900px) {
+	.hero__inner { padding-block: var(--s11) var(--s9); }
+}
+
+/* ── 8b. Trust bar ───────────────────────────────────────────────────── */
+
+.trustbar {
+	background: var(--paper);
+	border-bottom: 1px solid var(--line-soft);
+}
+.trustbar__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: var(--s5) var(--s4);
+	padding-block: var(--s5);
+}
+.trustbar__item { display: flex; align-items: flex-start; gap: var(--s3); }
+.trustbar__icon { color: var(--blue); flex: 0 0 auto; margin-top: 1px; }
+.trustbar__text { display: flex; flex-direction: column; line-height: 1.3; }
+.trustbar__label { font-weight: 600; font-size: .95rem; letter-spacing: -.01em; }
+.trustbar__sub { font-size: .82rem; color: var(--muted); }
+
+@media (min-width: 760px) {
+	.trustbar__list {
+		grid-template-columns: repeat(4, 1fr);
+		padding-block: var(--s5);
+	}
+	.trustbar__item + .trustbar__item {
+		border-inline-start: 1px solid var(--line-soft);
+		padding-inline-start: var(--s5);
+	}
+}
+
+/* ── 10. Services — editorial index ──────────────────────────────────── */
+
+.svc-index { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+
+.svc-index__row {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	grid-template-areas:
+		'icon name'
+		'.    desc';
+	column-gap: var(--s4);
+	row-gap: 4px;
+	align-items: baseline;
+	padding-block: var(--s5);
+	border-bottom: 1px solid var(--line);
+}
+.svc-index__icon {
+	grid-area: icon;
+	color: var(--blue);
+	align-self: start;
+	margin-top: 2px;
+}
+.svc-index__name {
+	grid-area: name;
+	font-size: clamp(1.15rem, 2.1vw, 1.55rem);
+	font-weight: 600;
+	letter-spacing: -.022em;
+}
+.svc-index__name a { color: inherit; text-decoration: none; }
+.svc-index__name a:hover { color: var(--blue); }
+.svc-index__desc { grid-area: desc; color: var(--muted); margin: 0; font-size: .96rem; }
+.svc-index__go { grid-area: go; color: var(--muted); align-self: center; justify-self: end; }
+
+@media (min-width: 820px) {
+	.svc-index__row {
+		grid-template-columns: auto minmax(16rem, 22rem) 1fr auto;
+		grid-template-areas: 'icon name desc go';
+		align-items: center;
+		column-gap: var(--s6);
+		padding-block: var(--s5);
+	}
+	.svc-index__icon { align-self: center; margin-top: 0; }
+	.svc-index__desc { text-align: start; }
+}
+
+/* ── 11. Pickup & booking form ───────────────────────────────────────── */
+
+.pickup__layout { display: grid; gap: var(--s7); }
+@media (min-width: 1000px) {
+	.pickup__layout { grid-template-columns: 1fr 1.05fr; gap: var(--s9); align-items: start; }
+}
+
+.pickup__points { list-style: none; margin: var(--s6) 0 0; padding: 0; display: grid; gap: var(--s4); }
+.pickup__points li { display: flex; gap: var(--s3); align-items: flex-start; }
+.pickup__points svg { color: #7FE0A6; flex: 0 0 auto; margin-top: 3px; }
+
+.form-card {
+	background: var(--paper);
+	border-radius: var(--r-lg);
+	padding: var(--s6);
+	box-shadow: var(--shadow-lg);
+	color: var(--ink);
+}
+.form-card__title { font-size: 1.25rem; margin-bottom: var(--s2); }
+.form-card__lede { font-size: .92rem; color: var(--muted); margin-bottom: var(--s5); }
+
+.field { display: block; margin-bottom: var(--s4); }
+.field__label {
+	display: block;
+	font-size: .82rem;
+	font-weight: 600;
+	color: var(--ink-soft);
+	margin-bottom: 6px;
+}
+.field__label span { font-weight: 400; color: var(--muted); }
+
+.field input[type="text"],
+.field input[type="tel"],
+.field input[type="date"],
+.field input[type="time"],
+.field select,
+.field textarea {
+	width: 100%;
+	padding: 12px var(--s3);
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+	font-size: 1rem;
+	transition: border-color .16s var(--ease), box-shadow .16s var(--ease);
+}
+
+/* The zone select carries the delivery price, so it reads as a normal field
+   rather than a browser default. */
+.field select {
+	appearance: none;
+	-webkit-appearance: none;
+	/* Chevron drawn inline so the control costs no extra request. Flipped for
+	   RTL further down. */
+	background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7C8D' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right var(--s3) center;
+	background-size: 18px;
+	padding-inline-end: calc(var(--s3) * 2 + 18px);
+}
+.mh-rtl .field select { background-position: left var(--s3) center; }
+
+
+/* Express opt-in. A checkbox the customer reads before ticking, so the hint
+   sits inside the label rather than beside it. */
+.field--check {
+	display: flex;
+	gap: var(--s3);
+	align-items: flex-start;
+	padding: 12px var(--s3);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+	background: var(--paper);
+	font-size: .92rem;
+	line-height: 1.45;
+	cursor: pointer;
+	align-self: end;
+}
+.field--check input { margin-top: 2px; flex: 0 0 auto; width: 18px; height: 18px; accent-color: var(--blue); }
+.field--check:has(input:checked) { border-color: var(--blue); background: var(--blue-wash); }
+.field--check:has(input:focus-visible) { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.field__hint {
+	display: block;
+	font-size: .82rem;
+	color: var(--muted);
+	line-height: 1.45;
+	margin: 2px 0 var(--s4);
+}
+.field--check .field__hint { margin: 2px 0 0; }
+.field input:focus, .field select:focus, .field textarea:focus {
+	border-color: var(--blue);
+	box-shadow: 0 0 0 3px var(--blue-wash);
+	outline: none;
+}
+.field textarea { min-height: 84px; resize: vertical; }
+
+.field-row { display: grid; gap: var(--s3); }
+@media (min-width: 520px) { .field-row { grid-template-columns: 1fr 1fr; } }
+
+.chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.chip {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 9px var(--s3);
+	border: 1px solid var(--line);
+	border-radius: 999px;
+	font-size: .88rem;
+	cursor: pointer;
+	transition: border-color .16s var(--ease), background-color .16s var(--ease);
+}
+.chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+.chip:has(input:checked) { border-color: var(--blue); background: var(--blue-wash); color: var(--blue-ink); font-weight: 500; }
+.chip:has(input:focus-visible) { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.form__consent { font-size: .78rem; color: var(--muted); margin-top: var(--s3); text-align: center; }
+
+.form__status {
+	margin-top: var(--s3);
+	padding: var(--s3) var(--s4);
+	border-radius: var(--r);
+	font-size: .89rem;
+	display: none;
+}
+.form__status.is-visible { display: block; }
+.form__status--ok    { background: #E9F7EF; color: var(--green-ink); }
+.form__status--error { background: #FDECEC; color: #A32020; }
+
+/*
+ * Honeypot. Clipped rather than shoved off-canvas: a negative `left` becomes
+ * scrollable once the scroll origin mirrors in RTL. Kept out of the
+ * accessibility tree by the aria-hidden on the element itself.
+ */
+.hp {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* ── 12. How it works ────────────────────────────────────────────────── */
+
+/* The <ol> supplies semantics; the numerals are drawn by the counter below,
+   so the native markers have to go or every step reads "1. 01". */
+.steps { counter-reset: step; list-style: none; margin: 0; padding: 0; }
+.step { position: relative; padding-top: var(--s5); border-top: 2px solid var(--line); }
+.step::before {
+	counter-increment: step;
+	content: counter(step, decimal-leading-zero);
+	display: block;
+	font-size: .8rem;
+	font-weight: 700;
+	letter-spacing: .1em;
+	color: var(--blue);
+	margin-bottom: var(--s3);
+}
+.step__title { font-size: 1.05rem; font-weight: 600; margin-bottom: var(--s2); }
+.step__desc { font-size: .92rem; color: var(--muted); }
+
+/* ── 13. Pricing ─────────────────────────────────────────────────────── */
+
+.price-table {
+	width: 100%;
+	border-collapse: collapse;
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--r-lg);
+	overflow: hidden;
+}
+.price-table caption { text-align: start; padding-bottom: var(--s3); color: var(--muted); font-size: .88rem; }
+.price-table th, .price-table td { padding: 14px var(--s4); text-align: start; }
+.price-table thead th {
+	background: var(--sand);
+	font-size: .74rem;
+	font-weight: 600;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+	color: var(--muted);
+	border-bottom: 1px solid var(--line);
+}
+.price-table tbody tr + tr td { border-top: 1px solid var(--line-soft); }
+.price-table td:not(:first-child), .price-table th:not(:first-child) { text-align: end; white-space: nowrap; }
+.price-table .price-article { font-weight: 500; }
+.price-table .price-both { font-weight: 600; }
+.price-table .price-iron { color: var(--blue); font-weight: 600; }
+
+.price-note { font-size: .84rem; color: var(--muted); margin-top: var(--s4); max-width: var(--reading); }
+.price-actions { margin-top: var(--s5); }
+
+.price-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── 14. Why M&H — typography-led ────────────────────────────────────── */
+
+.why__layout { display: grid; gap: var(--s7); }
+@media (min-width: 940px) {
+	.why__layout { grid-template-columns: .9fr 1.1fr; gap: var(--s10); align-items: start; }
+	.why__intro { position: sticky; top: 108px; }
+}
+.why__intro .btn { margin-top: var(--s6); }
+
+.why__list { list-style: none; margin: 0; padding: 0; counter-reset: why; }
+.why__item {
+	counter-increment: why;
+	padding-block: var(--s5);
+	border-top: 1px solid var(--line);
+	display: grid;
+	grid-template-columns: 2.5rem 1fr;
+	column-gap: var(--s4);
+}
+.why__item:last-child { border-bottom: 1px solid var(--line); }
+.why__item::before {
+	content: counter(why, decimal-leading-zero);
+	grid-row: 1 / span 2;
+	font-size: .8rem;
+	font-weight: 700;
+	letter-spacing: .08em;
+	color: var(--blue);
+	padding-top: 4px;
+	direction: ltr;
+}
+.why__title { font-size: 1.12rem; font-weight: 600; margin-bottom: var(--s2); letter-spacing: -.015em; }
+.why__desc { color: var(--muted); margin: 0; font-size: .96rem; }
+
+/* ── 15. Reviews — editorial pull-quotes ─────────────────────────────── */
+
+.quote { margin: 0; display: flex; flex-direction: column; gap: var(--s3); }
+.quote__stars { display: flex; gap: 2px; color: var(--gold); }
+.quote__stars svg { fill: currentColor; stroke: none; }
+.quote__text {
+	margin: 0;
+	font-family: var(--font-serif);
+	font-style: italic;
+	letter-spacing: -.01em;
+	color: var(--ink);
+}
+.quote__by { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2); }
+.quote__name { font-weight: 600; font-size: .95rem; }
+.quote__src { font-size: .82rem; color: var(--muted); }
+.quote__src::before { content: '· '; }
+
+.quote--lead {
+	padding-bottom: var(--s7);
+	border-bottom: 1px solid var(--line);
+	margin-bottom: var(--s7);
+}
+.quote--lead .quote__text {
+	font-size: clamp(1.5rem, 3.4vw, 2.35rem);
+	line-height: 1.24;
+	max-width: 22ch;
+}
+@media (min-width: 760px) {
+	.quote--lead .quote__text { max-width: 26ch; }
+}
+
+.quote-pair { display: grid; gap: var(--s7); }
+@media (min-width: 760px) { .quote-pair { grid-template-columns: 1fr 1fr; gap: var(--s9); } }
+.quote-pair .quote__text { font-size: 1.15rem; line-height: 1.5; }
+
+/* Arabic has no italic tradition; the serif accent is dropped for it. */
+.mh-lang-ar .quote__text { font-style: normal; }
+
+/* ── 16. Location ────────────────────────────────────────────────────── */
+
+.location__layout { display: grid; gap: var(--s7); }
+@media (min-width: 900px) { .location__layout { grid-template-columns: .85fr 1.15fr; align-items: start; } }
+
+.nap { list-style: none; margin: var(--s6) 0 0; padding: 0; display: grid; gap: var(--s4); }
+.nap__row { display: flex; gap: var(--s4); align-items: flex-start; }
+.nap__icon { color: var(--blue); flex: 0 0 auto; margin-top: 2px; }
+.nap__label {
+	display: block;
+	font-size: .74rem;
+	font-weight: 600;
+	letter-spacing: .1em;
+	text-transform: uppercase;
+	color: var(--muted);
+	margin-bottom: 2px;
+}
+.nap__value { font-size: 1rem; font-weight: 500; color: var(--ink); text-decoration: none; }
+a.nap__value:hover { color: var(--blue); }
+.nap__note { font-size: .86rem; color: var(--muted); }
+
+.map-frame {
+	border: 1px solid var(--line);
+	border-radius: var(--r-lg);
+	overflow: hidden;
+	background: var(--sand-deep);
+	aspect-ratio: 4 / 3;
+}
+.map-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+/* ── 17. FAQ ─────────────────────────────────────────────────────────── */
+
+.faq { max-width: 52rem; margin-inline: auto; }
+.faq__item { border-bottom: 1px solid var(--line); }
+.faq__item summary {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--s4);
+	padding: var(--s5) 0;
+	cursor: pointer;
+	font-size: 1.05rem;
+	font-weight: 600;
+	letter-spacing: -.01em;
+	list-style: none;
+}
+.faq__item summary::-webkit-details-marker { display: none; }
+.faq__item summary::after {
+	content: '';
+	flex: 0 0 auto;
+	width: 20px; height: 20px;
+	margin-top: 4px;
+	background: currentColor;
+	opacity: .45;
+	transition: transform .2s var(--ease);
+	-webkit-mask: no-repeat center / 20px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M12 6v12M6 12h12'/%3E%3C/svg%3E");
+	        mask: no-repeat center / 20px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M12 6v12M6 12h12'/%3E%3C/svg%3E");
+}
+.faq__item[open] summary::after { transform: rotate(45deg); }
+.faq__answer { padding-bottom: var(--s5); color: var(--ink-soft); max-width: var(--reading); }
+
+/* ── 18. Final CTA ───────────────────────────────────────────────────── */
+
+.final { text-align: center; }
+.final__title { color: #fff; margin-bottom: var(--s4); }
+.final .btn-row { justify-content: center; margin-top: var(--s6); }
+
+/* ── 19. Footer ──────────────────────────────────────────────────────── */
+
+.footer { background: var(--navy-deep); color: rgba(255, 255, 255, .74); padding-block: var(--s8) var(--s6); }
+.footer__grid { display: grid; gap: var(--s7); }
+@media (min-width: 760px) { .footer__grid { grid-template-columns: 1.6fr 1fr 1fr 1fr; } }
+
+.footer__tagline { font-size: .92rem; margin-top: var(--s4); max-width: 30ch; }
+.footer__heading {
+	font-size: .74rem;
+	font-weight: 600;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, .5);
+	margin-bottom: var(--s4);
+}
+.footer__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); }
+.footer__list a { color: rgba(255, 255, 255, .8); text-decoration: none; font-size: .93rem; }
+.footer__list a:hover { color: #fff; text-decoration: underline; }
+.footer__list li { font-size: .93rem; }
+
+.footer__bottom {
+	margin-top: var(--s8);
+	padding-top: var(--s5);
+	border-top: 1px solid rgba(255, 255, 255, .13);
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--s4);
+	align-items: center;
+	justify-content: space-between;
+	font-size: .84rem;
+	color: rgba(255, 255, 255, .55);
+}
+
+/* ── 20. Sticky mobile CTA ───────────────────────────────────────────── */
+
+.sticky-cta {
+	position: fixed;
+	inset-inline: 0;
+	bottom: 0;
+	z-index: 90;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--s2);
+	padding: var(--s2) var(--s3) calc(var(--s2) + env(safe-area-inset-bottom));
+	background: rgba(255, 255, 255, .96);
+	backdrop-filter: blur(10px);
+	border-top: 1px solid var(--line);
+}
+.sticky-cta .btn { min-height: 48px; font-size: .93rem; }
+
+body { padding-bottom: 78px; }
+
+@media (min-width: 1100px) {
+	.sticky-cta { display: none; }
+	body { padding-bottom: 0; }
+}
+
+/* ── 21. 404 ─────────────────────────────────────────────────────────── */
+
+.error404-main { padding-block: var(--s10); text-align: center; }
+.error404-main .lede { margin-inline: auto; }
+.error404-links { list-style: none; padding: 0; margin: var(--s7) auto 0; max-width: 30rem; display: grid; gap: var(--s2); text-align: start; }
+.error404-links a {
+	display: block;
+	padding: var(--s4);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+	text-decoration: none;
+	color: var(--ink);
+	font-weight: 500;
+}
+.error404-links a:hover { border-color: var(--ink); }
+
+/* ── 22. RTL ─────────────────────────────────────────────────────────── */
+
+/* The copy sits on the right in Arabic, so the directional wash mirrors with
+   it. The vertical wash is direction-agnostic and stays as-is. */
+.mh-rtl .hero__shade {
+	background:
+		linear-gradient(to top,
+			rgba(6, 22, 40, .93) 0%,
+			rgba(6, 22, 40, .78) 26%,
+			rgba(6, 22, 40, .36) 54%,
+			rgba(6, 22, 40, .12) 78%,
+			rgba(6, 22, 40, .30) 100%),
+		linear-gradient(to left,
+			rgba(6, 22, 40, .55) 0%,
+			rgba(6, 22, 40, .22) 45%,
+			rgba(6, 22, 40, 0) 75%);
+}
+
+/* Mirror of the LTR focal points, so the fascia stays in frame either way. */
+.mh-rtl .hero__photo { object-position: 40% center; }
+@media (max-width: 760px) {
+	.mh-rtl .hero__photo { object-position: 58% center; }
+}
+
+/* Latin brand marks and phone numbers stay LTR inside RTL text. */
+.mh-rtl .brand__name,
+.mh-rtl .brand__line,
+.mh-rtl .hero__brandline,
+.mh-rtl .nap__value[href^="tel:"] { direction: ltr; unicode-bidi: isolate; }
+
+.mh-rtl .step::before { direction: ltr; }
+
+/* ── 23. Service pages ───────────────────────────────────────────────── */
+
+/* Head: breadcrumb, H1, direct answer. Typographic rather than a photo hero —
+   the storefront image belongs to the homepage and stays the brand's one big
+   picture. */
+.svc-head {
+	background: var(--sand);
+	border-bottom: 1px solid var(--line);
+	padding-block: var(--s6) var(--s9);
+}
+
+.crumbs { margin-bottom: var(--s6); }
+.crumbs__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--s2);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	font-size: .84rem;
+	color: var(--muted);
+}
+.crumbs__list li + li::before { content: '/'; margin-inline-end: var(--s2); color: var(--line); }
+.crumbs__list a { color: var(--muted); text-decoration: none; }
+.crumbs__list a:hover { color: var(--blue); text-decoration: underline; }
+.crumbs__list [aria-current] { color: var(--ink); }
+
+.svc-head__grid { display: grid; gap: var(--s5); }
+@media (min-width: 960px) {
+	.svc-head__grid { grid-template-columns: 1.05fr .95fr; gap: var(--s9); align-items: start; }
+}
+
+.svc-head__title {
+	font-size: clamp(2.1rem, 5vw, 3.6rem);
+	letter-spacing: -.032em;
+	line-height: 1.04;
+}
+
+/* The direct answer. Set larger than body copy because it is the paragraph a
+   reader scans first and the one an answer engine is most likely to quote. */
+.svc-answer {
+	font-size: clamp(1.05rem, 1.6vw, 1.22rem);
+	line-height: 1.6;
+	color: var(--ink-soft);
+	margin-bottom: var(--s5);
+}
+.svc-head__actions { margin-top: var(--s5); }
+
+/* Body: prose left, factual lists right. */
+.svc-body__grid { display: grid; gap: var(--s7); }
+@media (min-width: 960px) {
+	.svc-body__grid { grid-template-columns: 1.15fr .85fr; gap: var(--s9); align-items: start; }
+}
+.svc-body__prose p {
+	font-size: 1.03rem;
+	line-height: 1.7;
+	max-width: var(--reading);
+	margin-bottom: var(--s4);
+}
+
+.svc-body__lists { display: grid; gap: var(--s6); }
+.svc-list__title {
+	font-size: .76rem;
+	font-weight: 600;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	color: var(--muted);
+	padding-bottom: var(--s3);
+	border-bottom: 1px solid var(--line);
+	margin-bottom: var(--s4);
+}
+.svc-list__items { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); }
+.svc-list__items li { display: flex; gap: var(--s3); align-items: flex-start; font-size: .95rem; }
+.svc-list__items svg { color: var(--blue); flex: 0 0 auto; margin-top: 4px; }
+
+.svc-process { margin-top: var(--s9); padding-top: var(--s7); border-top: 1px solid var(--line); }
+.svc-process__title {
+	font-size: .76rem;
+	font-weight: 600;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	color: var(--muted);
+	margin-bottom: var(--s6);
+}
+
+/* Pickup band. */
+.svc-pickup__grid { display: grid; gap: var(--s6); }
+@media (min-width: 960px) {
+	.svc-pickup__grid {
+		grid-template-columns: 1fr 1fr;
+		gap: var(--s7) var(--s9);
+		align-items: start;
+	}
+	.svc-pickup__actions { grid-column: 1 / -1; }
+}
+.svc-pickup__steps {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	counter-reset: sp;
+	display: grid;
+	gap: var(--s4);
+}
+.svc-pickup__steps li {
+	counter-increment: sp;
+	display: grid;
+	grid-template-columns: 2rem 1fr;
+	gap: var(--s3);
+	padding-bottom: var(--s4);
+	border-bottom: 1px solid rgba(255, 255, 255, .14);
+}
+/* The numeral spans both rows; the title and the description share column 2.
+   Without the explicit placement the description auto-flows into the 2rem
+   numeral column and wraps to one word per line. */
+.svc-pickup__steps li::before {
+	content: counter(sp, decimal-leading-zero);
+	grid-column: 1;
+	grid-row: 1 / span 2;
+	font-size: .78rem;
+	font-weight: 700;
+	color: #9DBBF5;
+	padding-top: 3px;
+	direction: ltr;
+}
+.svc-pickup__steps strong { grid-column: 2; display: block; font-size: 1rem; margin-bottom: 2px; }
+.svc-pickup__steps span { grid-column: 2; color: rgba(255, 255, 255, .72); font-size: .92rem; }
+
+/* Full price list. */
+.price-group + .price-group { margin-top: var(--s8); }
+.price-group__title {
+	font-size: 1.15rem;
+	font-weight: 600;
+	letter-spacing: -.015em;
+	margin-bottom: var(--s4);
+	padding-bottom: var(--s3);
+	border-bottom: 2px solid var(--ink);
+}
+
+/* ── 24. NAP block (contact page) ────────────────────────────────────── */
+
+.nap-grid { display: grid; gap: var(--s5); }
+@media (min-width: 640px) { .nap-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1040px) { .nap-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.nap-card {
+	display: flex;
+	flex-direction: column;
+	gap: var(--s3);
+	padding-top: var(--s4);
+	border-top: 2px solid var(--ink);
+}
+.nap-card__title {
+	font-size: .74rem;
+	font-weight: 600;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+.nap-card__body { font-style: normal; font-size: .98rem; line-height: 1.6; margin: 0; }
+.nap-card__brand {
+	font-size: .68rem;
+	font-weight: 600;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+.nap-card__note { color: var(--muted); font-size: .88rem; }
+.nap-card__phone {
+	font-size: 1.18rem;
+	font-weight: 600;
+	color: var(--ink);
+	text-decoration: none;
+	letter-spacing: -.01em;
+	direction: ltr;
+	unicode-bidi: isolate;
+	display: inline-block;
+}
+.nap-card__phone:hover { color: var(--blue); }
+.nap-card .btn { margin-top: auto; align-self: flex-start; }
+
+.btn--sm { min-height: 40px; padding: 9px var(--s4); font-size: .88rem; }
+
+/* Pickup pricing note. Sits inside the navy pickup band on every page, so the
+   two delivery prices are stated once in markup and appear consistently. */
+.pickup-price {
+	display: flex;
+	gap: var(--s3);
+	align-items: flex-start;
+	margin-top: var(--s5);
+	padding: var(--s4);
+	border: 1px solid rgba(255, 255, 255, .22);
+	border-radius: var(--r);
+	background: rgba(255, 255, 255, .06);
+	font-size: .93rem;
+	line-height: 1.55;
+	color: rgba(255, 255, 255, .86);
+	max-width: 34rem;
+}
+.pickup-price svg { color: #9DBBF5; flex: 0 0 auto; margin-top: 3px; }
+
+/* Express sits beside the delivery note and must not compete with it: same
+   block, warmer accent, tighter top margin so they read as a pair. */
+.pickup-price--express { margin-top: var(--s3); }
+.pickup-price--express svg { color: var(--gold); }

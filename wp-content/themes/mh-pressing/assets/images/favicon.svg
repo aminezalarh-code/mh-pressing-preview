@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="M&amp;H Pressing">
+  <!--
+    The Giant Washing Machine mark, taken from mh_brand_lockup() in
+    inc/images.php. Same geometry; the body fills are solid here rather than
+    opacity-tinted, because the tinted version turns to mush at 16px.
+  -->
+  <rect width="48" height="48" rx="10" fill="#0E2A4A"/>
+  <rect x="9" y="9" width="30" height="5" rx="2.5" fill="#FFFFFF" opacity=".34"/>
+  <circle cx="34.5" cy="11.5" r="1.8" fill="#1A56DB"/>
+  <circle cx="24" cy="29" r="13" fill="#FFFFFF"/>
+  <circle cx="24" cy="29" r="9.4" fill="#0E2A4A"/>
+  <path d="M15.2 30.6a5.8 5.8 0 0 1 8.8 0 5.8 5.8 0 0 0 8.8 0v3.3a9.3 9.3 0 0 1-17.6 0z" fill="#1A56DB"/>
+</svg>
