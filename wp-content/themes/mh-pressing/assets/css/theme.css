@@ -67,6 +67,20 @@
 	--green-ink:  #10592A;
 	--gold:       #C89B3C;
 
+	/*
+	 * Lime. A brand accent, deliberately not a text colour.
+	 *
+	 * #B8E62E on white is 1.7:1 — nowhere near readable — so it is used only
+	 * where contrast is not being asked of it: the eyebrow rule, the frame
+	 * edge, the step markers, hover states. --lime-ink is the readable
+	 * relative for the rare case a lime-family word is needed on light
+	 * ground (6.4:1 on white). Keeping these apart is what stops a brand
+	 * colour quietly undoing the contrast work.
+	 */
+	--lime:       #B8E62E;
+	--lime-soft:  #EAF7C8;
+	--lime-ink:   #3D5A0B;
+
 	/* Type */
 	--font-sans:  'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 	--font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
@@ -311,6 +325,19 @@ a:hover { color: var(--blue-ink); }
 }
 .btn--glass:hover { background: rgba(255, 255, 255, .24); color: #fff; border-color: #fff; }
 
+/*
+ * The hero's second action. Quiet by design: booking is the page's purpose
+ * and a pricing link competing at equal weight would split the decision. It
+ * sits on the navy field, so it borrows the glass treatment rather than the
+ * light-ground outline used elsewhere.
+ */
+.btn--quiet {
+	background: transparent;
+	color: #fff;
+	border-color: rgba(255, 255, 255, .34);
+}
+.btn--quiet:hover { background: rgba(255, 255, 255, .12); color: #fff; border-color: rgba(255, 255, 255, .6); }
+
 .btn--whatsapp { background: var(--green); color: #fff; }
 .btn--whatsapp:hover { background: var(--green-ink); color: #fff; }
 
@@ -389,11 +416,16 @@ a:hover { color: var(--blue-ink); }
 .nav__list {
 	display: flex;
 	align-items: center;
-	gap: var(--s5);
+	/* s5 put the row 30px over the 1200px container at 1440, which wrapped
+	   "Ramassage & Livraison" and "À propos" onto second lines and pushed the
+	   header to 77px of ragged type. */
+	gap: var(--s4);
 	margin: 0; padding: 0;
 	list-style: none;
 }
 .nav__link {
+	/* A nav item that wraps stops looking like navigation. */
+	white-space: nowrap;
 	color: var(--ink-soft);
 	text-decoration: none;
 	font-size: .93rem;
@@ -408,7 +440,9 @@ a:hover { color: var(--blue-ink); }
 .header__actions { display: flex; align-items: center; gap: var(--s3); margin-inline-start: auto; }
 @media (min-width: 1100px) { .header__actions { margin-inline-start: 0; } }
 
-.header__cta { display: none; }
+/* The header CTA wrapped to "Réserver un / ramassage", which made the whole
+   bar look like it had run out of room. */
+.header__cta { display: none; white-space: nowrap; }
 
 /* Desktop-only call link. Hidden below 1100px because the sticky CTA bar
    already carries WhatsApp and booking there; shown above it, where the
@@ -515,53 +549,150 @@ a:hover { color: var(--blue-ink); }
 
 /* ── 8. Hero ─────────────────────────────────────────────────────────── */
 
+/*
+ * Two columns: the argument on the reading side, the storefront framed beside
+ * it. This replaced a full-bleed photograph with the type laid over a scrim.
+ * That older treatment fought itself — the photo carries its own painted
+ * lettering ("PRESSING BLANCHISSERIE REPASSAGE" and a service list in the
+ * window), so the headline was competing with words inside its own background,
+ * and the scrim had to be heavy enough to win, which buried the shopfront it
+ * existed to show. Framed, both are legible and neither shouts.
+ */
 .hero {
 	position: relative;
-	background: var(--navy);
-	color: #fff;
+	background: var(--sand);
+	color: var(--ink);
 	overflow: hidden;
-	/* Cinematic, but never so tall the CTAs fall below the fold on a laptop. */
-	min-height: clamp(560px, 82vh, 860px);
-	display: flex;
-	align-items: flex-end;
 }
 
-.hero__media { position: absolute; inset: 0; }
+/* A quiet navy field behind the upper page, so the header sits on colour and
+   the hero does not read as a white box under a white bar. */
+.hero::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 62%;
+	background: var(--navy);
+}
+
+.hero__inner {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	gap: var(--s8);
+	padding-block: var(--s9) var(--s10);
+	align-items: center;
+}
+
+.hero__copy { max-width: 36rem; }
+
+.hero__eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--s3);
+	font-size: clamp(.7rem, 1vw, .78rem);
+	font-weight: 600;
+	letter-spacing: .2em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, .82);
+	margin-bottom: var(--s5);
+}
+
+/* The lime rule. Decoration only — it carries no information, so its contrast
+   is not load-bearing. */
+.hero__eyebrow::before {
+	content: "";
+	width: 28px;
+	height: 2px;
+	background: var(--lime);
+	border-radius: 2px;
+	flex: none;
+}
+
+.hero__title {
+	color: #fff;
+	font-size: clamp(2.25rem, 5.2vw, 3.9rem);
+	letter-spacing: -.03em;
+	line-height: 1.04;
+	margin-bottom: var(--s5);
+	text-wrap: balance;
+}
+
+.hero__deck {
+	font-size: clamp(1.02rem, 1.5vw, 1.2rem);
+	font-weight: 500;
+	line-height: 1.45;
+	color: rgba(255, 255, 255, .94);
+	margin-bottom: var(--s3);
+	letter-spacing: -.01em;
+	max-width: 32rem;
+}
+
+.hero__lede {
+	color: rgba(255, 255, 255, .78);
+	font-size: 1rem;
+	max-width: 32rem;
+	margin-bottom: var(--s6);
+}
+
+.hero__actions { margin-bottom: var(--s6); }
+
+/* Trust row. Three facts, not a card — a hairline above is enough separation. */
+.hero__trust {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--s3) var(--s6);
+	margin: 0;
+	padding-top: var(--s5);
+	border-top: 1px solid rgba(255, 255, 255, .16);
+	list-style: none;
+}
+
+.hero__trust-item {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--s2);
+	font-size: .88rem;
+	font-weight: 500;
+	color: rgba(255, 255, 255, .9);
+}
+
+.hero__trust-item svg { color: var(--lime); flex: none; }
+
+/* ── Figure ─────────────────────────────────────────────────────────── */
+
+.hero__figure { position: relative; }
 
 /*
- * Two-part scrim. A soft vertical wash anchors the type at the bottom, and a
- * gentle directional wash lifts the reading side. Both are far lighter than
- * the flat 93% wall this replaced, so the fascia, the window service list and
- * the lit interior all stay visible — the photograph does the selling.
+ * aspect-ratio reserves the height before the image decodes, so nothing below
+ * moves when it arrives. Measured CLS is 0 and this is what holds it there.
  */
-.hero__shade {
-	position: absolute;
-	inset: 0;
-	background:
-		linear-gradient(to top,
-			rgba(6, 22, 40, .93) 0%,
-			rgba(6, 22, 40, .78) 26%,
-			rgba(6, 22, 40, .36) 54%,
-			rgba(6, 22, 40, .12) 78%,
-			rgba(6, 22, 40, .30) 100%),
-		linear-gradient(to right,
-			rgba(6, 22, 40, .55) 0%,
-			rgba(6, 22, 40, .22) 45%,
-			rgba(6, 22, 40, 0) 75%);
+.hero__frame {
+	position: relative;
+	aspect-ratio: 4 / 3;
+	border-radius: var(--r-lg);
+	overflow: hidden;
+	background: var(--navy-deep);
+	box-shadow: var(--shadow-lg);
+	/* A hairline rather than a border: enough to separate the photo from the
+	   navy field without drawing a box around it. */
+	outline: 1px solid rgba(255, 255, 255, .1);
+	outline-offset: -1px;
 }
+
+.hero__frame picture,
+.hero__frame img { display: block; width: 100%; height: 100%; }
 
 .hero__photo {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
-	object-position: 60% center;
+	object-position: 56% center;
 }
 
-/*
- * Narrow viewports crop hard horizontally. Pulling the focal point left keeps
- * the M&H fascia and the entrance in frame instead of landing on blank
- * shopfront glass — the sign is the part that proves this is a real premises.
- */
+/* Narrow viewports crop hard. Pulling the focal point left keeps the M&H
+   fascia and the entrance in frame instead of blank shopfront glass — the sign
+   is the part that proves this is a real premises. */
 @media (max-width: 760px) {
 	.hero__photo { object-position: 42% center; }
 }
@@ -569,8 +700,7 @@ a:hover { color: var(--blue-ink); }
 .hero__photo--empty {
 	width: 100%; height: 100%;
 	display: grid; place-items: center;
-	background:
-		repeating-linear-gradient(135deg, #16324F 0 22px, #14304B 22px 44px);
+	background: repeating-linear-gradient(135deg, #16324F 0 22px, #14304B 22px 44px);
 }
 .hero__photo-note {
 	font-size: .82rem;
@@ -581,61 +711,6 @@ a:hover { color: var(--blue-ink); }
 	padding: var(--s3) var(--s5);
 	border-radius: var(--r);
 	text-align: center;
-}
-
-.hero__inner {
-	position: relative;
-	z-index: 1;
-	width: 100%;
-	padding-block: var(--s10) var(--s8);
-}
-
-.hero__copy { max-width: 34rem; }
-
-.hero__brandline {
-	display: block;
-	font-size: clamp(.72rem, 1.1vw, .82rem);
-	font-weight: 600;
-	letter-spacing: .34em;
-	text-transform: uppercase;
-	color: rgba(255, 255, 255, .78);
-	margin-bottom: var(--s4);
-}
-
-.hero__title {
-	color: #fff;
-	font-size: clamp(2.75rem, 7.4vw, 5.25rem);
-	letter-spacing: -.035em;
-	line-height: .98;
-	margin-bottom: var(--s4);
-	text-wrap: pretty;
-}
-
-/* The deck carries the services; the lede carries pickup and delivery. */
-.hero__deck {
-	font-size: clamp(1.08rem, 1.7vw, 1.35rem);
-	font-weight: 500;
-	line-height: 1.35;
-	color: #fff;
-	margin-bottom: var(--s3);
-	letter-spacing: -.012em;
-	max-width: 28rem;
-}
-
-.hero__lede {
-	color: rgba(255, 255, 255, .82);
-	font-size: 1rem;
-	max-width: 30rem;
-	margin-bottom: var(--s6);
-}
-
-.hero__actions { margin-bottom: 0; }
-
-/* Full-width stacked CTAs on phones: booking is the page's whole purpose and
-   a content-width button on a 375px screen is a small target. */
-@media (max-width: 560px) {
-	.hero__actions { flex-direction: column; align-items: stretch; }
-	.hero__actions .btn { width: 100%; }
 }
 
 .hero__temp-flag {
@@ -653,8 +728,28 @@ a:hover { color: var(--blue-ink); }
 }
 .hero__temp-flag code { font-size: .72rem; background: rgba(0, 0, 0, .08); padding: 1px 5px; border-radius: 3px; }
 
-@media (min-width: 900px) {
-	.hero__inner { padding-block: var(--s11) var(--s9); }
+/* Phones: booking is the page's whole purpose and a content-width button on a
+   375px screen is a small target. */
+@media (max-width: 560px) {
+	.hero__actions { flex-direction: column; align-items: stretch; }
+	.hero__actions .btn { width: 100%; }
+}
+
+/* The split. Below this the columns stack and the navy field covers the copy
+   rather than a fixed fraction of a much taller box. */
+@media (max-width: 999px) {
+	.hero::before { height: 100%; }
+	.hero__inner { padding-block: var(--s8) var(--s9); }
+}
+
+@media (min-width: 1000px) {
+	.hero__inner {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr);
+		gap: var(--s9);
+		padding-block: var(--s10) var(--s11);
+	}
+	.hero::before { height: 100%; }
+	.hero__title { margin-bottom: var(--s5); }
 }
 
 /* ── 8b. Trust bar ───────────────────────────────────────────────────── */
